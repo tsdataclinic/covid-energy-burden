@@ -7,6 +7,14 @@ from sklearn.metrics import mean_absolute_error as MAE
 from datetime import datetime
 from fbprophet import Prophet
 
+from matplotlib.dates import (
+        MonthLocator,
+        num2date,
+        AutoDateLocator,
+        AutoDateFormatter,
+    )
+from matplotlib.ticker import FuncFormatter
+
 def median_filter(df, varname = 'y', window=24, std=2.75): 
     """
     A simple median filter, removes (i.e. replace by np.nan) observations that exceed N (default = 3) 
@@ -320,8 +328,8 @@ def state_plot(df, state, sector,col='pct_error', year_lim=2019):
     plt.xlabel('Month')
     plt.ylabel('% Error in prediction')
     plt.axvline(x=datetime(2020,2,15),color='#f76d23',linestyle='dotted')
-    plt.axhline(y=mean_error_before, xmin=0, xmax=0.63, color='r', linestyle='--',linewidth=1.5)
-    plt.axhline(y=mean_error_after, xmin=0.63, xmax=1, color='g', linestyle='--',linewidth=1.5)
+    plt.axhline(y=mean_error_before, xmin=0, xmax=0.58, color='r', linestyle='--',linewidth=1.5)
+    plt.axhline(y=mean_error_after, xmin=0.58, xmax=1, color='g', linestyle='--',linewidth=1.5)
     sign = '+' if mean_error_after-mean_error_before > 0 else '-'
     text_color = 'g' if mean_error_after-mean_error_before > 0 else 'r'
     plt.text(x=datetime(2020,2,10),y=(mean_error_after),s= "{}{}%".format(sign, np.round(mean_error_after-mean_error_before,2)),
@@ -330,18 +338,21 @@ def state_plot(df, state, sector,col='pct_error', year_lim=2019):
 #     plt.axvline()
 
 
-def get_model_for_state_sector(data, state, sector, split_year=2019, plot_forecast=False, changepoint_prior_scale=0.5):
+def get_model_for_state_sector(data, state, sector, split_year=2019, plot_forecast=False, changepoint_prior_scale=0.5,samples=300):
     ## Defining Training Data 
     df_model = data[(data.state == state)&(data.sector == sector)].copy().set_index('date').sort_index()
-    df_train, df_test = prepare_data(df_model[['y','heating_days','cooling_days','pct_weekdays']], year=split_year)
-    regressors_df = df_model[['heating_days','cooling_days','pct_weekdays']]
+    df_train, df_test = prepare_data(df_model[['y','heating_days','cooling_days','pct_weekdays','hot','cold','wind']], year=split_year)
+    regressors_df = df_model[['heating_days','cooling_days','pct_weekdays','hot','cold','wind']]
     ## Defining Prophet Model
     m = Prophet(seasonality_mode='multiplicative',
-                yearly_seasonality=5,daily_seasonality=False,weekly_seasonality=False,mcmc_samples=300,
+                yearly_seasonality=5,daily_seasonality=False,weekly_seasonality=False,mcmc_samples=samples,
                 changepoint_prior_scale=changepoint_prior_scale, changepoint_range=0.95)
     m.add_regressor('heating_days', mode='additive')
     m.add_regressor('cooling_days', mode='additive')
     m.add_regressor('pct_weekdays', mode='additive')
+    m.add_regressor('hot', mode='additive')
+    m.add_regressor('cold', mode='additive')
+    m.add_regressor('wind', mode='additive')
     # m.add_regressor('weird_range', mode='additive')
     m_fit = m.fit(df_train,control={'max_treedepth': 12})
     ## Getting forecasts
@@ -358,3 +369,55 @@ def get_model_for_state_sector(data, state, sector, split_year=2019, plot_foreca
     if plot_forecast:
         f =  plot_verif(verif,split_year)
         plot_joint_plot(verif.loc['2019':'2019',:], title='test set')
+        
+
+def prophet_plot(
+    m, fcst, col, ax=None, uncertainty=True, plot_cap=True, xlabel='ds', ylabel='y',
+    figsize=(10, 6), include_legend=False
+):
+    """Plot the Prophet forecast.
+    Parameters
+    ----------
+    m: Prophet model.
+    fcst: pd.DataFrame output of m.predict.
+    ax: Optional matplotlib axes on which to plot.
+    uncertainty: Optional boolean to plot uncertainty intervals, which will
+        only be done if m.uncertainty_samples > 0.
+    plot_cap: Optional boolean indicating if the capacity should be shown
+        in the figure, if available.
+    xlabel: Optional label name on X-axis
+    ylabel: Optional label name on Y-axis
+    figsize: Optional tuple width, height in inches.
+    include_legend: Optional boolean to add legend to the plot.
+    Returns
+    -------
+    A matplotlib figure.
+    """
+    if ax is None:
+        fig = plt.figure(facecolor='w', figsize=figsize)
+        ax = fig.add_subplot(111)
+    else:
+        fig = ax.get_figure()
+    fcst_t = fcst['ds'].dt.to_pydatetime()
+    ax.plot(m.history['ds'].dt.to_pydatetime(), m.history['y'], 'k.',
+            label='Observed data points')
+    ax.plot(fcst_t, fcst['yhat'], ls='-', c=col, label='Predictions')
+    if 'cap' in fcst and plot_cap:
+        ax.plot(fcst_t, fcst['cap'], ls='--', c='k', label='Maximum capacity')
+    if m.logistic_floor and 'floor' in fcst and plot_cap:
+        ax.plot(fcst_t, fcst['floor'], ls='--', c='k', label='Minimum capacity')
+    if uncertainty and m.uncertainty_samples:
+        ax.fill_between(fcst_t, fcst['yhat_lower'], fcst['yhat_upper'],
+                        color=col, alpha=0.2, label='Uncertainty interval')
+    # Specify formatting to workaround matplotlib issue #12925
+    locator = AutoDateLocator(interval_multiples=False)
+    formatter = AutoDateFormatter(locator)
+    ax.xaxis.set_major_locator(locator)
+    ax.xaxis.set_major_formatter(formatter)
+    ax.grid(True, which='major', c='gray', ls='-', lw=1, alpha=0.2)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    if include_legend:
+        ax.legend()
+    fig.tight_layout()
+    return fig 
