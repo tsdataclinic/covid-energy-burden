@@ -4,7 +4,7 @@ With the move to learning and working from home and other measures such as stay-
 
 ## Methodology
 
-The key idea in this approach is to compare the actual energy consumption against expected consumption had there not been a pandemic. We estimate the latter measure by developing a model for energy use that account for the population, seasonality, trends over time, and weather-related variables. The model performance in the years prior to the pandemic indicated that it tracks actual energy use fairly well, allowing us to use it to generate predictions starting in 2020. These are the estimates of what energy use would have looked like had trends from the years prior continued.Lastly, we compare these predictions against the actual energy use during the pandemic to report the differences [here](data/energy_data_with_predictions_v2). 
+The key idea in this approach is to compare the actual energy consumption against expected consumption had there not been a pandemic. We estimate the latter measure by developing a model for energy use that account for the population, seasonality, trends over time, and weather-related variables. The model performance in the years prior to the pandemic indicated that it tracks actual energy use fairly well, allowing us to use it to generate predictions starting in 2020. These are the estimates of what energy use would have looked like had trends from the years prior continued.Lastly, we compare these predictions against the actual energy use during the pandemic to report the differences [here](data/energy_data_with_predictions_v2.csv). 
 
 We used the [FBProphet](https://facebook.github.io/prophet/) library to fit a Bayesian additive model for forecasting the energy use time-series.
 
