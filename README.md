@@ -11,9 +11,13 @@ We used the [FBProphet](https://facebook.github.io/prophet/) library to fit a Ba
 ## Data Sources
 
 Data from the US Energy Information Administration (EIA):
+
 [Monthly energy sales by state and sector](https://www.eia.gov/opendata/qb.php?category=38)
+
 [Number of consumers](https://www.eia.gov/opendata/qb.php?category=1718389)
+
 [Monthly Heating and cooling days](https://www.eia.gov/opendata/qb.php?category=829723)
 
 Data from the National Oceanic and Atmospheric Administration (NOAA):
+
 [Storm events](https://www1.ncdc.noaa.gov/pub/data/swdi/stormevents/csvfiles/)
