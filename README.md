@@ -21,3 +21,21 @@ Data from the US Energy Information Administration (EIA):
 Data from the National Oceanic and Atmospheric Administration (NOAA):
 
 [Storm events](https://www1.ncdc.noaa.gov/pub/data/swdi/stormevents/csvfiles/)
+
+
+### Directory Structure
+
+    covid-energy-burden/
+    ├── LICENSE
+    ├── README.md                     <- The top-level README for developers using this project
+    │
+    ├── data                          <- Folder where the intermediate data files are stores
+    │   ├── energy_data.csv           <- Raw energy use data by state and sector along with other variables used in the model
+    │   ├── energy_predictions.csv    <- Raw energy use data with predictions from the model
+    │
+    ├── src
+    │   ├── utils.py                  <- Utility functions used across the analysis pipeline
+    │   ├── EnergyData.ipynb          <- Notebook detailing the the data collection process
+    │   ├── EnergyModels.py           <- Notebook detailing the modeling process
+    │   └── EnergyViz.ipynb           <- Notebook for some accompaniying visualizations
+    
