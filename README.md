@@ -31,7 +31,7 @@ Data from the National Oceanic and Atmospheric Administration (NOAA):
     │
     ├── data                          <- Folder where the intermediate data files are stores
     │   ├── energy_data.csv           <- Raw energy use data by state and sector along with other variables used in the model
-    │   ├── energy_predictions.csv    <- Raw energy use data with predictions from the model
+    │   └── energy_predictions.csv    <- Raw energy use data with predictions from the model
     │
     ├── src
     │   ├── utils.py                  <- Utility functions used across the analysis pipeline
