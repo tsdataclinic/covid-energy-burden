@@ -1,3 +1,5 @@
+**This project is no longer maintained by Two Sigma. We continue to encourage independent development.**
+
 # Estimating additional energy use during Covid
 
 With the move to learning and working from home and other measures such as stay-at-home orders during the Covid-19 pandemic, there was a shift in energy consumption patterns. In this project, we try to estimate the effect of the pandemic on residential and commercial energy consumption. While aggregate measures of energy use give us an idea of the overall change due to the pandemic, we have tried to refine this estimate by developing a model for energy consumption over time and using it to refine the estimate of the increase or decrease in usage across the different mainland US states. 
